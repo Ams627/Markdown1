@@ -21,7 +21,7 @@ namespace Markdown1
 
     enum Tokens
     {
-        NlcHeader, // start of every location definition. .nlc 5883 rp02(192.168.207.1) rp03(192.168.207.2)
+        DotNlc, // start of every location definition. .nlc 5883 rp02(192.168.207.1) rp03(192.168.207.2)
         Nlc,
         Crs,
         Route,
@@ -32,8 +32,10 @@ namespace Markdown1
         DotQuicks,
         DotPops,
         DotBands,
+        DotHolidays,
         QuadDot,
         KvPair,
+        NewLine,
         EOF
     }
 
@@ -47,6 +49,11 @@ namespace Markdown1
         public static string TvmName => "[A-Za-z0-9]+";
         public static string Nlc => "[A-Z0-9]{3}[0-9]";
         public static string Crs => "[A-Z]{3}";
+        //public static string DotNlc => ".nlc";
+        //public static string DotQuick => ".quick";
+        //public static string DotPops => ".pops";
+        //public static string DotBands => ".bands";
+        //public static string DotHolidays => ".holidays";
     }
     /// <summary>
     /// This is a lexical analyser. Do some reading before changing it! It is specifically designed to parse
@@ -68,11 +75,35 @@ namespace Markdown1
         {
             foreach (var line in File.ReadLines(_filename).Select(x=>x.Trim()))
             {
-                var match = Regex.Match(line, $@"^.nlc +({Patterns.Nlc})( +{Patterns.TvmName}\( *{Patterns.QuadDotIp} *\))*");
-                if (match.Success)
+                var tokens = Regex.Split(line, "[ \t]");
+                foreach (var token in tokens)
                 {
-                    yield return Tokens.NlcHeader;
+                    if (token == ".nlc")
+                    {
+                        yield return Tokens.DotNlc;
+                    }
+                    else if (token == ".quicks")
+                    {
+                        yield return Tokens.DotQuicks;
+                    }
+                    else if (token == ".pops")
+                    {
+                        yield return Tokens.DotPops;
+                    }
+                    else if (token == ".bands")
+                    {
+                        yield return Tokens.DotBands;
+                    }
+                    else if (token == ".holidays")
+                    {
+                        yield return Tokens.DotHolidays;
+                    }
+                    else if (Regex.Match(token, ""))
+                    {
+
+                    }
                 }
+                yield return Tokens.NewLine;
             }
             yield return Tokens.EOF;
         }
